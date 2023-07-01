@@ -1,13 +1,20 @@
 import { View, Text } from "react-native";
-import { Link } from "expo-router";
+import { Button } from "react-native-paper";
 
-import { useAuth } from "../utils/containers/auth.container";
+import { AuthContext } from "../utils/containers/auth.container";
+import { useContext } from "react";
+import LoginScreen from "./(auth)/login";
 
 export default function Index() {
-  const { logout } = useAuth();
+  const { authState, logout } = useContext(AuthContext);
+
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text onPress={() => logout()}>Sign Out</Text>
+      {authState.authenticated && (
+        <Button onPress={() => logout()} mode="contained" uppercase dark>
+          Sign Out
+        </Button>
+      )}
     </View>
   );
 }
