@@ -13,17 +13,26 @@ import {
   useSafeAreaInsets,
   SafeAreaView,
 } from "react-native-safe-area-context";
-import { useTheme, Button, TextInput } from "react-native-paper";
+import {
+  useTheme,
+  Button,
+  TextInput,
+  SegmentedButtons,
+} from "react-native-paper";
 
 import { AuthContext } from "../../utils/containers/auth.container";
 
 function LoginScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const { login } = useContext(AuthContext);
+  const { login, register } = useContext(AuthContext);
 
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  const [loginView, setLoginView] = useState(true);
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(true);
 
   const onLogin = async () => {
@@ -31,6 +40,18 @@ function LoginScreen() {
     if (res && res.error) {
       console.log(res.msg);
       alert(res.msg);
+    }
+  };
+
+  const onRegister = async () => {
+    const res = await register(email, password);
+    if (res && res.error) {
+      console.log(res.msg);
+      alert(res.msg);
+    } else {
+      setEmail("");
+      setPassword("");
+      setLoginView(true);
     }
   };
 
@@ -42,7 +63,7 @@ function LoginScreen() {
         paddingTop: insets.top,
         justifyContent: "flex-start",
         alignItems: "center",
-        backgroundColor: theme.colors.primary,
+        backgroundColor: "#331e6ddb",
       }}
     >
       <KeyboardAvoidingView
@@ -60,38 +81,134 @@ function LoginScreen() {
           </View>
           {/* <Text style={{ fontSize: 28 }}>Login form goes here</Text> */}
 
+          <SegmentedButtons
+            value={loginView}
+            onValueChange={(val) => {
+              setLoginView(val);
+              setPassword(""), setConfirmPassword("");
+            }}
+            buttons={[
+              {
+                value: true,
+                label: "Login",
+                // checkedColor: theme.colors.secondary,
+                style: {
+                  backgroundColor: loginView
+                    ? theme.colors.secondary
+                    : theme.colors.primary,
+                },
+                uncheckedColor: theme.colors.secondary,
+              },
+              {
+                value: false,
+                label: "Register",
+                style: {
+                  backgroundColor: !loginView
+                    ? theme.colors.secondary
+                    : theme.colors.primary,
+                },
+                uncheckedColor: theme.colors.secondary,
+                // checkedColor: theme.colors.secondary,
+              },
+            ]}
+            style={{ marginBottom: 25 }}
+          />
+
           <View sx={{ width: "70%" }}>
-            <TextInput
-              label="Email"
-              value={email}
-              onChangeText={(txt) => setEmail(txt)}
-              style={{
-                backgroundColor: "#e0e0e0",
-                marginBottom: 50,
-                borderRadius: 4,
-              }}
-              // theme={{ roundness: 3 }}
-            />
-            <TextInput
-              label="Password"
-              value={password}
-              onChangeText={(txt) => setPassword(txt)}
-              secureTextEntry={showPassword}
-              right={
-                <TextInput.Icon
-                  icon="eye"
-                  onPress={(e) => setShowPassword((prev) => !prev)}
+            {loginView ? (
+              <>
+                <TextInput
+                  label="Email"
+                  value={email}
+                  onChangeText={(txt) => setEmail(txt)}
+                  style={{
+                    backgroundColor: "#e0e0e0",
+                    marginBottom: 50,
+                    borderRadius: 4,
+                  }}
+                  // theme={{ roundness: 3 }}
                 />
-              }
-              style={{
-                backgroundColor: "#e0e0e0",
-                // marginBottom: 50,
-                borderRadius: 4,
-              }}
-            />
+                <TextInput
+                  label="Password"
+                  value={password}
+                  onChangeText={(txt) => setPassword(txt)}
+                  secureTextEntry={showPassword}
+                  right={
+                    <TextInput.Icon
+                      icon="eye"
+                      onPress={(e) => setShowPassword((prev) => !prev)}
+                    />
+                  }
+                  style={{
+                    backgroundColor: "#e0e0e0",
+                    // marginBottom: 50,
+                    borderRadius: 4,
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                <TextInput
+                  label="Name"
+                  value={name}
+                  onChangeText={(txt) => setName(txt)}
+                  style={{
+                    backgroundColor: "#e0e0e0",
+                    marginBottom: 50,
+                    borderRadius: 4,
+                  }}
+                  // theme={{ roundness: 3 }}
+                />
+                <TextInput
+                  label="Email"
+                  value={email}
+                  onChangeText={(txt) => setEmail(txt)}
+                  style={{
+                    backgroundColor: "#e0e0e0",
+                    marginBottom: 50,
+                    borderRadius: 4,
+                  }}
+                  // theme={{ roundness: 3 }}
+                />
+                <TextInput
+                  label="Password"
+                  value={password}
+                  onChangeText={(txt) => setPassword(txt)}
+                  secureTextEntry={showPassword}
+                  right={
+                    <TextInput.Icon
+                      icon="eye"
+                      onPress={(e) => setShowPassword((prev) => !prev)}
+                    />
+                  }
+                  style={{
+                    backgroundColor: "#e0e0e0",
+                    marginBottom: 50,
+                    borderRadius: 4,
+                  }}
+                />
+                <TextInput
+                  label="Confirm Password"
+                  value={confirmPassword}
+                  onChangeText={(txt) => setConfirmPassword(txt)}
+                  secureTextEntry={true}
+                  // right={
+                  //   <TextInput.Icon
+                  //     icon="eye"
+                  //     onPress={(e) => setShowPassword((prev) => !prev)}
+                  //   />
+                  // }
+                  style={{
+                    backgroundColor: "#e0e0e0",
+                    // marginBottom: 50,
+                    borderRadius: 4,
+                  }}
+                />
+              </>
+            )}
           </View>
           <Button
-            onPress={onLogin}
+            onPress={loginView ? onLogin : onRegister}
             mode="contained"
             uppercase
             // dark
