@@ -39,13 +39,15 @@ function AuthProvider(props) {
     token: null,
     authenticated: null,
   });
-  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const { isLoading, setIsLoading, error, sendRequest, clearError } =
+    useHttpClient();
 
   const router = useRouter();
 
   // useProtectedRoute(authState.authenticated);
 
   React.useEffect(() => {
+    setIsLoading(true); // activate Loading screed
     if (["ios", "android"].includes(Platform.OS)) {
       const loadToken = async () => {
         const token = await SecureStore.getItemAsync(TOKEN_KEY);
@@ -54,8 +56,9 @@ function AuthProvider(props) {
           setAuthState({ token: token, authenticated: true });
           router.replace("/");
         } else {
-          router.replace("/login");
+          router.replace("/");
         }
+        setIsLoading(false);
       };
       loadToken();
     } else {
@@ -66,8 +69,9 @@ function AuthProvider(props) {
         setAuthState({ token: token, authenticated: true });
         router.replace("/");
       } else {
-        router.replace("/login");
+        router.replace("/");
       }
+      setIsLoading(false);
     }
   }, []);
 
@@ -141,18 +145,22 @@ function AuthProvider(props) {
     router.replace("/login");
   };
 
-  const register = async (email, password) => {
+  const register = async (name, email, password) => {
     try {
-      if (!email || !password) {
+      if (!email || !password || !name) {
         // throw new Error("enter data you shmuck");
-        return { error: true, msg: "enter data you shmuck" };
+        return { error: true, msg: "Enter all the data you shmuck" };
       }
+
+      // Check entered data
+
       const resData = await sendRequest(
         API_URL + "/signup",
         "POST",
         JSON.stringify({
           email: email,
           password: password,
+          name: name,
         }),
         {
           "Content-type": "application/json",

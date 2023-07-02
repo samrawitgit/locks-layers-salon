@@ -44,7 +44,11 @@ function LoginScreen() {
   };
 
   const onRegister = async () => {
-    const res = await register(email, password);
+    if (password.trim() !== confirmPassword.trim()) {
+      alert("Passwords do not match");
+      return;
+    }
+    const res = await register(name, email, password);
     if (res && res.error) {
       console.log(res.msg);
       alert(res.msg);
@@ -221,7 +225,7 @@ function LoginScreen() {
             buttonColor={theme.colors.secondary}
             labelStyle={{ fontSize: 20, fontWeight: "bold" }}
           >
-            Login
+            {loginView ? "Login" : "Register"}
           </Button>
           {/* </View> */}
         </Pressable>

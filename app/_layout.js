@@ -20,8 +20,11 @@ export default function Layout() {
     // Specify custom property in nested object
     // roundness: 30,
     colors: {
+      ...DefaultTheme.colors,
       primary: "#331E6D",
       secondary: "#FFCF31",
+      background: "#331e6d99",
+      text: "#fff",
     },
   };
   return (
