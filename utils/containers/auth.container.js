@@ -56,7 +56,7 @@ function AuthProvider(props) {
           setAuthState({ token: token, authenticated: true });
           router.replace("/");
         } else {
-          router.replace("/");
+          router.replace("/login");
         }
         setIsLoading(false);
       };
@@ -69,7 +69,7 @@ function AuthProvider(props) {
         setAuthState({ token: token, authenticated: true });
         router.replace("/");
       } else {
-        router.replace("/");
+        router.replace("/login");
       }
       setIsLoading(false);
     }
@@ -103,26 +103,26 @@ function AuthProvider(props) {
 
       // ... // only executes in case of res.ok
       setAuthState({ token: resData.token, authenticated: true });
-      if (!resData.error) {
-        if (["ios", "android"].includes(Platform.OS)) {
-          const secureStore = await SecureStore.setItemAsync(
-            TOKEN_KEY,
-            resData.data.token
-          );
-          console.log({ secureStore });
-        } else {
-          localStorage.setItem("token", resData.data.token);
-          localStorage.setItem("userId", resData.data.userId);
-          const remainingMilliseconds = 60 * 60 * 1000;
-          const expiryDate = new Date(
-            new Date().getTime() + remainingMilliseconds
-          );
-          localStorage.setItem("expiryDate", expiryDate.toISOString());
-        }
-        router.replace("/");
-        return resData.data;
+      if (resData.error) {
+        return { error: true, msg: resData.msg };
       }
-      return { error: true, msg: resData.msg };
+      if (["ios", "android"].includes(Platform.OS)) {
+        const secureStore = await SecureStore.setItemAsync(
+          TOKEN_KEY,
+          resData.data.token
+        );
+        console.log({ secureStore });
+      } else {
+        localStorage.setItem("token", resData.data.token);
+        localStorage.setItem("userId", resData.data.userId);
+        const remainingMilliseconds = 60 * 60 * 1000;
+        const expiryDate = new Date(
+          new Date().getTime() + remainingMilliseconds
+        );
+        localStorage.setItem("expiryDate", expiryDate.toISOString());
+      }
+      router.replace("/");
+      return resData.data;
     } catch (err) {
       console.log(err);
       return { error: true, msg: err.message };

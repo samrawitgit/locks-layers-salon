@@ -218,12 +218,12 @@ function LoginScreen() {
             // dark
             style={{
               marginTop: 50,
-              width: 200,
+              width: 150,
               height: 45,
               justifyContent: "center",
             }}
             buttonColor={theme.colors.secondary}
-            labelStyle={{ fontSize: 20, fontWeight: "bold" }}
+            labelStyle={{ fontSize: 18, color: "black", fontWeight: "bold" }}
           >
             {loginView ? "Login" : "Register"}
           </Button>
