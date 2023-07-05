@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Divider, List, Text, useTheme } from "react-native-paper";
+import { List, Text, useTheme } from "react-native-paper";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -26,9 +26,17 @@ const AllBookings = () => {
     { date: "03/07/2023", time: "11.30", location: "Rome", staff: "Mario" },
   ]);
 
+  const [expanded, setExpanded] = useState(list.map((el) => false));
+
   useEffect(() => {
     //fetch booking list
   }, []);
+
+  const handlePress = (id) => {
+    const newExpanded = [...expanded];
+    newExpanded[id] = !newExpanded[id];
+    setExpanded(newExpanded);
+  };
 
   if (list.length <= 0) {
     return (
@@ -69,6 +77,8 @@ const AllBookings = () => {
           <List.Accordion
             key={`booking-${i}`}
             title={`Booking ${i + 1}`}
+            expanded={expanded[i]}
+            onPress={() => handlePress(i)}
             titleStyle={{
               fontSize: "30px",
               color: theme.colors.text,
@@ -76,7 +86,7 @@ const AllBookings = () => {
             right={(props) => (
               <List.Icon
                 {...props}
-                icon="chevron-down"
+                icon={expanded[i] ? "chevron-up" : "chevron-down"}
                 color={theme.colors.text}
                 borderRadius="10px"
               />

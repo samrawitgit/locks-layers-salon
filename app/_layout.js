@@ -3,9 +3,10 @@ import { Slot } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import {
   MD3LightTheme as DefaultTheme,
-  PaperProvider,
+  Provider as PaperProvider,
 } from "react-native-paper";
 import { AuthProvider } from "../utils/containers/auth.container";
+import { ModalProvider } from "../utils/containers/modal.container";
 
 export const unstable_settings = {
   // Ensure any route can link back to `/`
@@ -32,7 +33,9 @@ export default function Layout() {
     <SafeAreaProvider>
       <AuthProvider>
         <PaperProvider theme={theme}>
-          <Slot />
+          <ModalProvider>
+            <Slot />
+          </ModalProvider>
         </PaperProvider>
       </AuthProvider>
     </SafeAreaProvider>
