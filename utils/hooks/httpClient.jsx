@@ -19,7 +19,7 @@ export const useHttpClient = () => {
       try {
         const response = await fetch(API_URL + url, {
           method,
-          body,
+          body: body ? JSON.stringify(body) : null,
           headers,
           signal: httpAbortCtrll.signal,
         });

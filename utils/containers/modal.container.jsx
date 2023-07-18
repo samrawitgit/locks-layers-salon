@@ -45,7 +45,7 @@ function ModalProvider({ children, containerStyle = {} }) {
   return (
     <ModalContext.Provider value={{ showModal: show, hideModal: hide, state }}>
       {children}
-      {state.show && (
+      {state.show && state.secondScrollView && (
         <Dialog
           className="modal-modal"
           visible={state.show}
@@ -97,29 +97,50 @@ function ModalProvider({ children, containerStyle = {} }) {
           </Dialog.Actions>
         </Dialog>
       )}
-      {/* {state.show && (
-        <Modal
+      {state.show && !state.secondScrollView && (
+        <Dialog
+          className="modal-modal"
+          visible={state.show}
+          onDismiss={hide}
+          style={{
+            height: "20vh",
+            width: "70vw",
+            left: "9vw",
+            justifyContent: "center",
+          }}
+        >
+          <Dialog.Title>{state.title}</Dialog.Title>
+          <Dialog.Content>{state.content}</Dialog.Content>
+          <Dialog.Actions style={{ gridArea: "footer", justifySelf: "end" }}>
+            <Button
+              onPress={() => {
+                hide();
+                state.onDismissModal();
+              }}
+            >
+              Done
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      )}
+      {/* <Modal
           className="modal-modal"
           visible={state.show}
           onDismiss={hide}
           contentContainerStyle={{
             boxShadow: "none",
-            height: "80vh",
+            height: "10vh",
             width: "70vw",
             ...containerStyle,
           }}
           style={{
-            height: "80vh",
+            height: "10vh",
             width: "70vw",
             backgroundColor: "rgb(231, 224, 236)",
             left: "15vw",
             top: "10vh",
           }}
-        >
-          <Text>Example Modal. Click outside this area to dismiss.</Text>
-          {state.content}
-        </Modal>
-      )} */}
+        > */}
     </ModalContext.Provider>
   );
 }

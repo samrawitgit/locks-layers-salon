@@ -24,8 +24,9 @@ export default function Layout() {
       ...DefaultTheme.colors,
       primary: "#331E6D",
       secondary: "#FFCF31",
-      background: "#331e6d99",
-      text: "#fff",
+      background: "#331E6D99",
+      text: "#E7E0EC",
+      title: "#350A55",
     },
   };
   return (

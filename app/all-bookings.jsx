@@ -79,11 +79,12 @@ const AllBookings = () => {
     >
       <List.Section
         title="My Bookings"
+        variant="displayMedium"
         titleStyle={{
-          fontSize: "40px",
+          fontSize: "45px",
           marginVertical: 20,
           textAlign: "center",
-          color: theme.colors.text,
+          color: theme.colors.title,
         }}
       >
         {bookingList.map((b, i) => (
