@@ -9,7 +9,7 @@ import BottomNavigator from "../components/BottomNavigator";
 import { Slot } from "expo-router";
 
 export default function Index() {
-  const { authState, logout } = useContext(AuthContext);
+  const { authenticated, logout } = useContext(AuthContext);
   const { isLoading } = useHttpClient();
 
   if (isLoading) {
@@ -19,7 +19,7 @@ export default function Index() {
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      {authState.authenticated && (
+      {authenticated && (
         <>
           <Slot />
           <BottomNavigator />

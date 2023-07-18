@@ -1,6 +1,7 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 // import { AppContext } from "@utils/containers/app.container";
+const API_URL = "http://192.168.1.121:8080";
 
 export const useHttpClient = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,7 +17,7 @@ export const useHttpClient = () => {
       activeHttpRequests.current.push(httpAbortCtrll);
 
       try {
-        const response = await fetch(url, {
+        const response = await fetch(API_URL + url, {
           method,
           body,
           headers,

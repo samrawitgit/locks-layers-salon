@@ -8,7 +8,6 @@ import { useHttpClient } from "../hooks/httpClient";
 const AuthContext = React.createContext(null);
 
 const TOKEN_KEY = "my_jwt";
-const API_URL = "http://localhost:8080/auth";
 
 // This hook will protect the route access based on user authentication.
 // function useProtectedRoute(authenticated) {
@@ -38,6 +37,7 @@ function AuthProvider(props) {
   const [authState, setAuthState] = React.useState({
     token: null,
     authenticated: null,
+    currentUser: null,
   });
   const { isLoading, setIsLoading, error, sendRequest, clearError } =
     useHttpClient();
@@ -47,32 +47,50 @@ function AuthProvider(props) {
   // useProtectedRoute(authState.authenticated);
 
   React.useEffect(() => {
+    // router.replace("/login");
     setIsLoading(true); // activate Loading screed
-    if (["ios", "android"].includes(Platform.OS)) {
-      const loadToken = async () => {
-        const token = await SecureStore.getItemAsync(TOKEN_KEY);
+    let token;
+    let expiryDate;
+    let userId;
 
-        if (token) {
-          setAuthState({ token: token, authenticated: true });
-          router.replace("/");
-        } else {
-          router.replace("/login");
-        }
-        setIsLoading(false);
-      };
-      loadToken();
+    if (["ios", "android"].includes(Platform.OS)) {
+      SecureStore.getItemAsync(TOKEN_KEY).then((res) => {
+        console.log({ res });
+        token = res; //TODO: check it works
+      });
+
+      // OLD FOR REFERENCE
+      // const loadToken = async () => {
+      //   const token = await SecureStore.getItemAsync(TOKEN_KEY);
+      //   if (token) {
+      //     setAuthState({ token: token, authenticated: true });
+      //     router.replace("/");
+      //   } else {
+      //     router.replace("/login");
+      //   }
+      //   setIsLoading(false);
+      // };
+      // loadToken();
     } else {
-      const token = localStorage.getItem("token");
-      const expiryDate = localStorage.getItem("expiryDate"); //TODO: check expiry
-      const userId = localStorage.getItem("userId");
+      token = localStorage.getItem("token");
+      expiryDate = localStorage.getItem("expiryDate"); //TODO: check expiry
+      userId = localStorage.getItem("userId");
+    }
+
+    sendRequest(`/auth/user/${userId}`, "GET").then(({ data }) => {
+      console.log({ data });
       if (token) {
-        setAuthState({ token: token, authenticated: true });
+        setAuthState({
+          token: token,
+          authenticated: true,
+          currentUser: data.userData,
+        });
         router.replace("/");
       } else {
         router.replace("/login");
       }
       setIsLoading(false);
-    }
+    });
   }, []);
 
   const login = async (email, password) => {
@@ -88,7 +106,7 @@ function AuthProvider(props) {
         // return;
       }
       const resData = await sendRequest(
-        API_URL + "/login",
+        "/auth/login",
         "POST",
         JSON.stringify({
           email: email,
@@ -102,7 +120,11 @@ function AuthProvider(props) {
       console.log({ resData });
 
       // ... // only executes in case of res.ok
-      setAuthState({ token: resData.token, authenticated: true });
+      setAuthState({
+        token: resData.token,
+        authenticated: true,
+        currentUser: resData.user,
+      });
       if (resData.error) {
         return { error: true, msg: resData.msg };
       }
@@ -114,7 +136,7 @@ function AuthProvider(props) {
         console.log({ secureStore });
       } else {
         localStorage.setItem("token", resData.data.token);
-        localStorage.setItem("userId", resData.data.userId);
+        localStorage.setItem("userId", resData.data.user.id);
         const remainingMilliseconds = 60 * 60 * 1000;
         const expiryDate = new Date(
           new Date().getTime() + remainingMilliseconds
@@ -179,7 +201,8 @@ function AuthProvider(props) {
         login,
         logout,
         register,
-        authState,
+        authenticated: authState.authenticated,
+        user: authState.currentUser,
       }}
     >
       {props.children}
