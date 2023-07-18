@@ -17,11 +17,6 @@ const Profile = () => {
   const theme = useTheme();
   const { logout, user } = useContext(AuthContext);
 
-  const userData = useMemo(() => user, [user]);
-
-  if (!userData) {
-  }
-
   return (
     <SafeAreaView
       style={{
@@ -44,10 +39,10 @@ const Profile = () => {
                 justifyContent: "space-evenly",
               }}
             >
-              <Text>Name: {userData.name}</Text>
-              <Text>Email: {userData.email}</Text>
-              <Text>Telephone: {userData.tel}</Text>
-              <Text>City: {userData.city}</Text>
+              <Text>Name: {user.name}</Text>
+              <Text>Email: {user.email}</Text>
+              <Text>Telephone: {user.tel}</Text>
+              <Text>City: {user.city}</Text>
             </View>
           </Card.Content>
         </Card>
