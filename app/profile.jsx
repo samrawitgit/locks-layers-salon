@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
   Avatar,
   BottomNavigation,
@@ -15,11 +15,12 @@ import { View } from "react-native-web";
 
 const Profile = () => {
   const theme = useTheme();
-  const { logout } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext);
 
-  useEffect(() => {
-    //fetch user data
-  }, []);
+  const userData = useMemo(() => user, [user]);
+
+  if (!userData) {
+  }
 
   return (
     <SafeAreaView
@@ -43,10 +44,10 @@ const Profile = () => {
                 justifyContent: "space-evenly",
               }}
             >
-              <Text>Name</Text>
-              <Text>Email</Text>
-              <Text>Telephone</Text>
-              <Text>City</Text>
+              <Text>Name: {userData.name}</Text>
+              <Text>Email: {userData.email}</Text>
+              <Text>Telephone: {userData.tel}</Text>
+              <Text>City: {userData.city}</Text>
             </View>
           </Card.Content>
         </Card>

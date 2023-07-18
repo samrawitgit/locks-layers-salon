@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import { useHttpClient } from "../utils/hooks/httpClient";
 
 const Item = ({ title }) => {
   const theme = useTheme();
@@ -19,17 +20,28 @@ const Item = ({ title }) => {
 const AllBookings = () => {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { sendRequest } = useHttpClient();
 
-  const [list, setList] = useState([
-    { date: "03/07/2023", time: "11.30", location: "Rome", staff: "Mario" },
-    { date: "03/07/2023", time: "11.30", location: "Rome", staff: "Mario" },
-    { date: "03/07/2023", time: "11.30", location: "Rome", staff: "Mario" },
-  ]);
+  const [bookingList, setBookingList] = useState([]);
 
-  const [expanded, setExpanded] = useState(list.map((el) => false));
+  const [expanded, setExpanded] = useState(bookingList.map((el) => false));
 
   useEffect(() => {
     //fetch booking list
+    const userId = localStorage.getItem("userId");
+    console.log({ userId });
+    sendRequest(`/user-bookings/${userId}`)
+      .then(({ data, error }) => {
+        if (data.error) {
+          console.log(data.message);
+          return alert(data.message);
+        }
+        setBookingList(data.bookings);
+      })
+      .catch((err) => {
+        console.log(err);
+        alert(err);
+      });
   }, []);
 
   const handlePress = (id) => {
@@ -38,7 +50,7 @@ const AllBookings = () => {
     setExpanded(newExpanded);
   };
 
-  if (list.length <= 0) {
+  if (bookingList.length <= 0) {
     return (
       <SafeAreaView
         style={{
@@ -62,6 +74,7 @@ const AllBookings = () => {
         // backgroundColor: theme.colors.background,
         color: theme.colors.text,
         width: "100vw",
+        overflow: "scroll",
       }}
     >
       <List.Section
@@ -73,7 +86,7 @@ const AllBookings = () => {
           color: theme.colors.text,
         }}
       >
-        {list.map((b, i) => (
+        {bookingList.map((b, i) => (
           <List.Accordion
             key={`booking-${i}`}
             title={`Booking ${i + 1}`}
@@ -83,6 +96,7 @@ const AllBookings = () => {
               fontSize: "30px",
               color: theme.colors.text,
             }}
+            // sx={{ width: "80%" }}
             right={(props) => (
               <List.Icon
                 {...props}
@@ -92,11 +106,40 @@ const AllBookings = () => {
               />
             )}
           >
+            <Item
+              title={`
+              ${b.booking_date.slice(0, 10)} 
+              ${b.booking_date.slice(11, 16)}`}
+            />
+            <Item title={b.city} />
+            <Item title={b.staff_name} />
+          </List.Accordion>
+        ))}
+        {/* OLD
+        {LIST.map((b, i) => (
+          <List.Accordion
+            key={`booking-${i}`}
+            title={`Booking ${i + 1}`}
+            expanded={expandedOld[i]}
+            onPress={() => handlePressOld(i)}
+            titleStyle={{
+              fontSize: "30px",
+              color: theme.colors.text,
+            }}
+            right={(props) => (
+              <List.Icon
+                {...props}
+                icon={expandedOld[i] ? "chevron-up" : "chevron-down"}
+                color={theme.colors.text}
+                borderRadius="10px"
+              />
+            )}
+          >
             <Item title={`${b.date} ${b.time}`} />
             <Item title={b.location} />
             <Item title={b.staff} />
           </List.Accordion>
-        ))}
+        ))} */}
       </List.Section>
     </SafeAreaView>
   );
