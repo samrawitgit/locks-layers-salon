@@ -11,6 +11,8 @@ function ModalProvider({ children, containerStyle = {} }) {
     content: null,
     secondScrollView: false,
     onDismissModal: () => {},
+    style: {},
+    dismissable: true,
   });
 
   const show = ({
@@ -18,6 +20,8 @@ function ModalProvider({ children, containerStyle = {} }) {
     content,
     secondScrollView = false,
     onDismissModal = () => {},
+    style = {},
+    dismissable = true,
   }) => {
     setState({
       show: true,
@@ -25,6 +29,8 @@ function ModalProvider({ children, containerStyle = {} }) {
       content,
       secondScrollView,
       onDismissModal,
+      style,
+      dismissable,
     });
   };
 
@@ -35,6 +41,8 @@ function ModalProvider({ children, containerStyle = {} }) {
       content: null,
       secondScrollView: false,
       onDismissModal: () => {},
+      style: {},
+      dismissable: true,
     });
   };
 
@@ -50,6 +58,7 @@ function ModalProvider({ children, containerStyle = {} }) {
           className="modal-modal"
           visible={state.show}
           onDismiss={hide}
+          dismissable={state.dismissable}
           style={{
             height: "60vh",
             width: "70vw",
@@ -102,8 +111,9 @@ function ModalProvider({ children, containerStyle = {} }) {
           className="modal-modal"
           visible={state.show}
           onDismiss={hide}
+          dismissable={state.dismissable}
           style={{
-            height: "20vh",
+            ...state.style,
             width: "70vw",
             left: "9vw",
             justifyContent: "center",

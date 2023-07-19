@@ -108,10 +108,10 @@ function AuthProvider(props) {
       const resData = await sendRequest(
         "/auth/login",
         "POST",
-        JSON.stringify({
+        {
           email: email,
           password: password,
-        }),
+        },
         {
           "Content-type": "application/json",
           // Authorization: "Bearer " + this.props.token, //Bearer is a convention
@@ -179,11 +179,11 @@ function AuthProvider(props) {
       const resData = await sendRequest(
         API_URL + "/signup",
         "POST",
-        JSON.stringify({
+        {
           email: email,
           password: password,
           name: name,
-        }),
+        },
         {
           "Content-type": "application/json",
           // "Authorization": 'Bearer ' + this.props.token //Bearer is a convention
