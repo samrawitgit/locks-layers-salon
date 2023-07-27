@@ -21,10 +21,12 @@ import {
 } from "react-native-paper";
 
 import { AuthContext } from "../../utils/containers/auth.container";
+import { useRouter } from "expo-router";
 
 function LoginScreen() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const router = useRouter();
   const { login, register } = useContext(AuthContext);
 
   const [loginView, setLoginView] = useState(true);
@@ -34,13 +36,15 @@ function LoginScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(true);
+  // TODO: add telefone and preferred city
 
   const onLogin = async () => {
     const res = await login(email, password);
     if (res && res.error) {
       console.log(res.msg);
-      alert(res.msg);
+      return alert(res.msg);
     }
+    router.push("/");
   };
 
   const onRegister = async () => {

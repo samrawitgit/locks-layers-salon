@@ -77,27 +77,29 @@ function AuthProvider(props) {
       userId = localStorage.getItem("userId");
     }
 
-    sendRequest(`/auth/user/${userId}`, "GET").then(({ data }) => {
-      console.log({ data });
-      if (token) {
-        setAuthState({
-          token: token,
-          authenticated: true,
-          currentUser: data.userData,
-        });
-        router.replace("/");
-      } else {
-        router.replace("/login");
-      }
-      setIsLoading(false);
-    });
+    if (userId) {
+      sendRequest(`/auth/user/${userId}`, "GET").then(({ data }) => {
+        console.log({ data });
+        if (token) {
+          setAuthState({
+            token: token,
+            authenticated: true,
+            currentUser: data.userData,
+          });
+          router.replace("/");
+        } else {
+          router.replace("/login");
+        }
+        setIsLoading(false);
+      });
+    }
   }, []);
 
   const login = async (email, password) => {
     console.log(email, password, { os: Platform.OS });
     try {
       if (!email || !password) {
-        return { error: true, msg: "enter data you shmuck" };
+        return { error: true, msg: "Enter valid credentials!" };
         // throw new Error("enter data you shmuck");
         // showPopUp({
         //   title: "Wrong credentials",
@@ -143,7 +145,6 @@ function AuthProvider(props) {
         );
         localStorage.setItem("expiryDate", expiryDate.toISOString());
       }
-      router.replace("/");
       return resData.data;
     } catch (err) {
       console.log(err);

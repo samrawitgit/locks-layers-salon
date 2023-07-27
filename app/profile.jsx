@@ -9,13 +9,41 @@ import {
   useTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { KeyboardAvoidingView, Pressable } from "react-native";
 import { AuthContext } from "../utils/containers/auth.container";
 import { View } from "react-native-web";
+import { useHttpClient } from "../utils";
 
 const Profile = () => {
   const theme = useTheme();
-  const { logout, user } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
+  const [userData, setUserData] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { sendRequest } = useHttpClient();
+
+  useEffect(() => {
+    setIsLoading(true);
+    const userId = localStorage.getItem("userId");
+
+    sendRequest(`/auth/user/${userId}`)
+      .then(({ data }) => {
+        if (data.error) {
+          console.log(data.message);
+          return alert(data.message);
+        }
+        setUserData(data.userData);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        alert(err);
+        setIsLoading(false);
+      });
+  }, []);
+
+  if (isLoading) {
+    return <Text>Is Loading</Text>;
+  }
 
   return (
     <SafeAreaView
@@ -39,10 +67,10 @@ const Profile = () => {
                 justifyContent: "space-evenly",
               }}
             >
-              <Text>Name: {user.name}</Text>
-              <Text>Email: {user.email}</Text>
-              <Text>Telephone: {user.tel}</Text>
-              <Text>City: {user.city}</Text>
+              <Text>Name: {userData.name}</Text>
+              <Text>Email: {userData.email}</Text>
+              <Text>Telephone: {userData.tel}</Text>
+              <Text>City: {userData.city}</Text>
             </View>
           </Card.Content>
         </Card>

@@ -20,12 +20,18 @@ const NewBookingRoute = () => {
   const [allServices, setAllServices] = useState([]);
 
   useEffect(() => {
-    sendRequest("/admin/locations")
+    const token = localStorage.getItem("token");
+    console.log({ token });
+    sendRequest("/admin/locations", "GET", null, {
+      Authorization: `Bearer ${token}`,
+    })
       .then(({ data }) => {
         console.log({ data });
         if (!data.error) {
           setAllLocations(data.locations);
-          sendRequest("/admin/services")
+          sendRequest("/admin/services", "GET", null, {
+            Authorization: `Bearer ${token}`,
+          })
             .then(({ data }) => {
               if (!data.error) {
                 setAllServices(data.services);
