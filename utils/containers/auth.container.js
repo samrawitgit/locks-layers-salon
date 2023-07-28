@@ -43,6 +43,7 @@ function AuthProvider(props) {
     useHttpClient();
 
   const router = useRouter();
+  // console.log({ authState });
 
   // useProtectedRoute(authState.authenticated);
 
@@ -54,6 +55,13 @@ function AuthProvider(props) {
     let userId;
 
     if (["ios", "android"].includes(Platform.OS)) {
+      SecureStore.getItemAsync("userId").then((res) => {
+        console.log({ res });
+        if (!res) {
+          router.push("/login");
+        }
+        userId = res; //TODO: check it works
+      });
       SecureStore.getItemAsync(TOKEN_KEY).then((res) => {
         console.log({ res });
         token = res; //TODO: check it works
@@ -75,6 +83,9 @@ function AuthProvider(props) {
       token = localStorage.getItem("token");
       expiryDate = localStorage.getItem("expiryDate"); //TODO: check expiry
       userId = localStorage.getItem("userId");
+      if (!token || !userId) {
+        router.push("/login");
+      }
     }
 
     if (userId) {
@@ -97,16 +108,16 @@ function AuthProvider(props) {
 
   const login = async (email, password) => {
     console.log(email, password, { os: Platform.OS });
+    if (!email || !password) {
+      return { error: true, msg: "Enter valid credentials!" };
+      // throw new Error("enter data you shmuck");
+      // showPopUp({
+      //   title: "Wrong credentials",
+      //   content: "Insert valid credentials",
+      // });
+      // return;
+    }
     try {
-      if (!email || !password) {
-        return { error: true, msg: "Enter valid credentials!" };
-        // throw new Error("enter data you shmuck");
-        // showPopUp({
-        //   title: "Wrong credentials",
-        //   content: "Insert valid credentials",
-        // });
-        // return;
-      }
       const resData = await sendRequest(
         "/auth/login",
         "POST",
@@ -168,22 +179,42 @@ function AuthProvider(props) {
     router.replace("/login");
   };
 
-  const register = async (name, email, password) => {
+  const register = async (
+    name,
+    email,
+    password,
+    confirmPassword,
+    tel,
+    location
+  ) => {
+    if (!email || !password || !confirmPassword || !name || !tel || !location) {
+      // throw new Error("enter data you shmuck");
+      return {
+        error: true,
+        msg: "Please enter all the data",
+        missingData: [
+          name,
+          email,
+          password,
+          confirmPassword,
+          tel,
+          location,
+        ].filter((el) => !el),
+      };
+    }
     try {
-      if (!email || !password || !name) {
-        // throw new Error("enter data you shmuck");
-        return { error: true, msg: "Enter all the data you shmuck" };
-      }
-
       // Check entered data
 
       const resData = await sendRequest(
-        API_URL + "/signup",
+        "/auth/signup",
         "POST",
         {
           email: email,
           password: password,
+          confirmPassword: confirmPassword,
           name: name,
+          tel: tel,
+          location: location,
         },
         {
           "Content-type": "application/json",

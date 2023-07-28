@@ -20,7 +20,7 @@ const Item = ({ title }) => {
 const AllBookings = () => {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  const { sendRequest } = useHttpClient();
+  const { sendRequest, setIsLoading } = useHttpClient();
 
   const [bookingList, setBookingList] = useState([]);
 
@@ -28,6 +28,7 @@ const AllBookings = () => {
 
   useEffect(() => {
     //fetch booking list
+    setIsLoading(true);
     const userId = localStorage.getItem("userId");
     console.log({ userId });
     sendRequest(`/user-bookings/${userId}`)
@@ -41,7 +42,8 @@ const AllBookings = () => {
       .catch((err) => {
         console.log(err);
         alert(err);
-      });
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const handlePress = (id) => {

@@ -31,6 +31,7 @@ const Profile = () => {
           console.log(data.message);
           return alert(data.message);
         }
+        // console.log({ uD: data.userData });
         setUserData(data.userData);
         setIsLoading(false);
       })
@@ -70,7 +71,7 @@ const Profile = () => {
               <Text>Name: {userData.name}</Text>
               <Text>Email: {userData.email}</Text>
               <Text>Telephone: {userData.tel}</Text>
-              <Text>City: {userData.city}</Text>
+              <Text>City: {userData.favLocation}</Text>
             </View>
           </Card.Content>
         </Card>

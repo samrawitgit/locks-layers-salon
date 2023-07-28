@@ -16,31 +16,36 @@ export const useHttpClient = () => {
       const httpAbortCtrll = new AbortController();
       activeHttpRequests.current.push(httpAbortCtrll);
 
-      try {
-        const response = await fetch(API_URL + url, {
-          method,
-          body: body ? JSON.stringify(body) : null,
-          headers,
-          signal: httpAbortCtrll.signal,
-        });
+      // try {
+      const response = await fetch(API_URL + url, {
+        method,
+        body: body ? JSON.stringify(body) : null,
+        headers,
+        signal: httpAbortCtrll.signal,
+      });
 
-        const responseData = await response.json();
+      const responseData = await response.json();
+      console.log({ responseData });
 
-        if (!response.ok) {
-          return { error: true, msg: responseData.message };
-        }
+      if (!response.ok) {
+        return {
+          error: true,
+          msg: responseData.message,
+          errorList: responseData.errorList,
+        };
+      }
 
-        activeHttpRequests.current = activeHttpRequests.current.filter(
-          (reqCtrl) => reqCtrl !== httpAbortCtrll
-        );
+      activeHttpRequests.current = activeHttpRequests.current.filter(
+        (reqCtrl) => reqCtrl !== httpAbortCtrll
+      );
 
-        setIsLoading(false);
-        return { data: responseData, error: false };
-      } catch (err) {
+      setIsLoading(false);
+      return { data: responseData, error: false };
+      /*}  catch (err) {
         setError({ title: "err", message: err });
         setIsLoading(false);
         return { error: true, msg: err.message };
-      }
+      } */
     },
     []
   );
