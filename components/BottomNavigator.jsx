@@ -63,7 +63,8 @@ const BottomNavigator = () => {
       navigationState={{ index, routes }}
       onIndexChange={setIndex}
       renderScene={renderScene}
-      barStyle={{ width: "100vw" }}
+      // barStyle={{ width: "100%" }} //"100%"
+      style={{ flex: 1 }} // flex: 1
       // renderLabel={renderLabel}
     />
   );

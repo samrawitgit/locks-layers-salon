@@ -40,7 +40,10 @@ function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(true);
+  const [showPassword, setShowPassword] = useState({
+    main: true,
+    confirm: true,
+  });
   const [tel, setTel] = useState("");
   const [location, setLocation] = useState(null);
 
@@ -64,8 +67,9 @@ function LoginScreen() {
     if (res && res.error) {
       console.log(res.msg);
       return alert(res.msg);
+    } else {
+      router.push("/");
     }
-    router.push("/");
   };
 
   const onRegister = async () => {
@@ -108,86 +112,102 @@ function LoginScreen() {
       <ScrollView>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1, paddingHorizontal: 16, paddingVertical: 32 }}
+          style={{
+            flex: 1,
+            // paddingHorizontal: 16,
+            // paddingVertical: 32,
+            // width: 200,
+            paddingBottom: 50,
+          }}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <Pressable>
-              {/* <View className="page"> */}
-              <View>
+            <Pressable
+              style={{
+                left: ["ios", "android"].includes(Platform.OS) ? -50 : "",
+                flexDirection: "column",
+                alignItems: "center",
+                paddingBottom: 50,
+              }}
+            >
+              <View
+                style={{
+                  maxWidth: 500,
+                  maxHeight: 250,
+                  alignItems: "center",
+                }}
+              >
                 <Image
                   source={require("@assets/logo-no-background.png")}
                   style={{
-                    width: 200,
-                    height: 200,
-                    // width: "100vw",
-                    // // height: "100%",
-                    transform: "scale(0.3)", // TODO: fix size
+                    transform: [{ scale: 0.3 }],
                   }}
                 />
               </View>
-              {/* <Text style={{ fontSize: 28 }}>Login form goes here</Text> */}
-              {/* <View style={{}}> */}
-              <SegmentedButtons
-                value={loginView}
-                onValueChange={(val) => {
-                  setLoginView(val);
-                  setPassword(""), setConfirmPassword("");
-                }}
-                buttons={[
-                  {
-                    value: true,
-                    label: "Login",
-                    // checkedColor: theme.colors.secondary,
-                    style: {
-                      backgroundColor: loginView
-                        ? theme.colors.secondary
-                        : theme.colors.primary,
+              <View style={{ width: 250 }}>
+                <SegmentedButtons
+                  value={loginView}
+                  onValueChange={(val) => {
+                    setLoginView(val);
+                    setPassword(""), setConfirmPassword("");
+                    setShowPassword({ main: true, confirm: true });
+                  }}
+                  buttons={[
+                    {
+                      value: true,
+                      label: "Login",
+                      style: {
+                        backgroundColor: loginView
+                          ? theme.colors.secondary
+                          : theme.colors.primary,
+                      },
+                      uncheckedColor: theme.colors.secondary,
                     },
-                    uncheckedColor: theme.colors.secondary,
-                  },
-                  {
-                    value: false,
-                    label: "Register",
-                    style: {
-                      backgroundColor: !loginView
-                        ? theme.colors.secondary
-                        : theme.colors.primary,
+                    {
+                      value: false,
+                      label: "Register",
+                      style: {
+                        backgroundColor: !loginView
+                          ? theme.colors.secondary
+                          : theme.colors.primary,
+                      },
+                      uncheckedColor: theme.colors.secondary,
+                      // checkedColor: theme.colors.secondary,
                     },
-                    uncheckedColor: theme.colors.secondary,
-                    // checkedColor: theme.colors.secondary,
-                  },
-                ]}
-                style={{ marginBottom: 25 }}
-              />
+                  ]}
+                  style={{ marginBottom: 25 }}
+                />
 
-              <View sx={{ width: "70%" }}>
                 {loginView ? (
                   <>
                     <TextInput
                       label="Email"
                       value={email}
+                      keyboardType="email-address"
                       onChangeText={(txt) => setEmail(txt)}
                       style={{
                         backgroundColor: "#e0e0e0",
                         marginBottom: 50,
                         borderRadius: 4,
                       }}
-                      // theme={{ roundness: 3 }}
                     />
                     <TextInput
                       label="Password"
                       value={password}
                       onChangeText={(txt) => setPassword(txt)}
-                      secureTextEntry={showPassword}
+                      secureTextEntry={showPassword.main}
                       right={
                         <TextInput.Icon
-                          icon="eye"
-                          onPress={(e) => setShowPassword((prev) => !prev)}
+                          icon={showPassword.main ? "eye" : "eye-off"}
+                          onPress={(e) =>
+                            setShowPassword((prev) => ({
+                              ...prev,
+                              main: !prev.main,
+                            }))
+                          }
                         />
                       }
                       style={{
                         backgroundColor: "#e0e0e0",
-                        // marginBottom: 50,
                         borderRadius: 4,
                       }}
                     />
@@ -203,28 +223,32 @@ function LoginScreen() {
                         marginBottom: 50,
                         borderRadius: 4,
                       }}
-                      // theme={{ roundness: 3 }}
                     />
                     <TextInput
                       label="Email"
                       value={email}
+                      keyboardType="email-address"
                       onChangeText={(txt) => setEmail(txt)}
                       style={{
                         backgroundColor: "#e0e0e0",
                         marginBottom: 50,
                         borderRadius: 4,
                       }}
-                      // theme={{ roundness: 3 }}
                     />
                     <TextInput
                       label="Password"
                       value={password}
                       onChangeText={(txt) => setPassword(txt)}
-                      secureTextEntry={showPassword}
+                      secureTextEntry={showPassword.main}
                       right={
                         <TextInput.Icon
-                          icon="eye"
-                          onPress={(e) => setShowPassword((prev) => !prev)}
+                          icon={showPassword.main ? "eye" : "eye-off"}
+                          onPress={(e) =>
+                            setShowPassword((prev) => ({
+                              ...prev,
+                              main: !prev.main,
+                            }))
+                          }
                         />
                       }
                       style={{
@@ -237,13 +261,18 @@ function LoginScreen() {
                       label="Confirm Password"
                       value={confirmPassword}
                       onChangeText={(txt) => setConfirmPassword(txt)}
-                      secureTextEntry={true}
-                      // right={
-                      //   <TextInput.Icon
-                      //     icon="eye"
-                      //     onPress={(e) => setShowPassword((prev) => !prev)}
-                      //   />
-                      // }
+                      secureTextEntry={showPassword.confirm}
+                      right={
+                        <TextInput.Icon
+                          icon={showPassword.confirm ? "eye" : "eye-off"}
+                          onPress={(e) =>
+                            setShowPassword((prev) => ({
+                              ...prev,
+                              confirm: !prev.confirm,
+                            }))
+                          }
+                        />
+                      }
                       style={{
                         backgroundColor: "#e0e0e0",
                         marginBottom: 50,
@@ -290,7 +319,8 @@ function LoginScreen() {
                   marginTop: 50,
                   width: 150,
                   height: 45,
-                  justifyContent: "center",
+                  // justifyContent: "center",
+                  alignSelf: "center",
                 }}
                 buttonColor={theme.colors.secondary}
                 labelStyle={{

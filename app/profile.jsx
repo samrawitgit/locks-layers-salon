@@ -1,4 +1,5 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import * as SecureStore from "expo-secure-store";
 import {
   Avatar,
   BottomNavigation,
@@ -10,7 +11,7 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "../utils/containers/auth.container";
-import { View } from "react-native-web";
+import { Platform, View } from "react-native";
 import { useHttpClient } from "../utils";
 
 const Profile = () => {
@@ -21,28 +22,71 @@ const Profile = () => {
 
   const { sendRequest } = useHttpClient();
 
-  useEffect(() => {
-    setIsLoading(true);
-    const userId = localStorage.getItem("userId");
-
-    sendRequest(`/auth/user/${userId}`)
-      .then(({ data }) => {
+  const loadUserBookings = async (userId) => {
+    // console.log({ user, id: user ? user._id : "idk", userId });
+    console.log({ userId });
+    return sendRequest(`/user-bookings/${userId}`)
+      .then(({ data, error }) => {
         if (data.error) {
           console.log(data.message);
-          return alert(data.message);
+          // return alert(data.message);
         }
-        // console.log({ uD: data.userData });
-        setUserData(data.userData);
-        setIsLoading(false);
+        // setBookingList(data.bookings);
+        // return { error: false, bookings: data.bookings };
+        return data;
       })
       .catch((err) => {
         console.log(err);
         alert(err);
-        setIsLoading(false);
-      });
+      })
+      .finally(() => setIsLoading(false));
+  };
+
+  useEffect(() => {
+    setIsLoading(true);
+    let userId;
+    if (["ios", "android"].includes(Platform.OS)) {
+      SecureStore.getItemAsync("userId")
+        .then((res) => {
+          console.log({ res });
+          if (!res) {
+            router.push("/login");
+          }
+          // userId = res; //TODO: check it works
+          loadUserBookings(res)
+            .then((res) => {
+              console.log("ueff res", { res });
+              if (res.error) {
+                return alert(res.message);
+              }
+              // setBookingList(res.bookings);
+              setUserData(res.userData);
+            })
+            .catch((err) => console.log(err));
+        })
+        .catch((err) => console.log("no userId in scurestore", err));
+    } else {
+      userId = localStorage.getItem("userId");
+    }
+
+    // sendRequest(`/auth/user/${userId}`)
+    //   .then(({ data }) => {
+    //     if (data.error) {
+    //       console.log(data.message);
+    //       return alert(data.message);
+    //     }
+    //     // console.log({ uD: data.userData });
+    //     setUserData(data.userData);
+    //     setIsLoading(false);
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //     alert(err);
+    //     setIsLoading(false);
+    //   });
   }, []);
 
-  if (isLoading) {
+  if (isLoading || !userData || Object.keys(userData).length < 1) {
     return <Text>Is Loading</Text>;
   }
 
@@ -54,17 +98,30 @@ const Profile = () => {
         // justifyContent: "flex-end",
         // backgroundColor: theme.colors.background,
         color: theme.colors.text,
-        width: "100vw",
+        // width: "100%", //"100%", // it was vw
       }}
     >
-      <View style={{ height: "50vh", justifyContent: "space-evenly" }}>
+      <View
+        style={{
+          height: ["ios", "android"].includes(Platform.OS) ? 420 : "50%",
+          justifyContent: "space-evenly",
+        }}
+      >
         <Card mode="contained" style={{ padding: 15 }}>
-          <Card.Content style={{ height: "20vh", flexDirection: "row" }}>
+          <Card.Content
+            style={{
+              height: ["ios", "android"].includes(Platform.OS) ? 150 : "20%",
+              flexDirection: "row",
+            }}
+          >
+            {/* it was vh */}
             <Avatar.Text label="XD" />
             <View
               style={{
                 flexDirection: "column",
-                marginLeft: "30px",
+                marginLeft: ["ios", "android"].includes(Platform.OS)
+                  ? 20
+                  : "30px" /*was px = 30*/,
                 justifyContent: "space-evenly",
               }}
             >

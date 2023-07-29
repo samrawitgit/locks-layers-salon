@@ -1,13 +1,16 @@
 import React, { useEffect, useState, useContext } from "react";
 import { KeyboardAvoidingView, View, Pressable } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, RadioButton, Text, useTheme } from "react-native-paper";
 import { ModalContext, useHttpClient, AuthContext } from "../utils";
 import { TimeModal } from "../components/TimeModal";
 import { BookingCalendar } from "../components/BookingCalendar";
+import { useRouter } from "expo-router";
 
 const NewBookingRoute = () => {
   const theme = useTheme();
+  const router = useRouter();
   const { showModal } = useContext(ModalContext);
   const { user } = useContext(AuthContext);
   const { sendRequest } = useHttpClient();
@@ -20,7 +23,18 @@ const NewBookingRoute = () => {
   const [allServices, setAllServices] = useState([]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    let token;
+    if (["ios", "android"].includes(Platform.OS)) {
+      SecureStore.getItemAsync("token").then((res) => {
+        console.log({ res });
+        if (!res) {
+          router.push("/login");
+        }
+        token = res; //TODO: check it works
+      });
+    } else {
+      token = localStorage.getItem("token");
+    }
     console.log({ token });
     sendRequest("/admin/locations", "GET", null, {
       Authorization: `Bearer ${token}`,
@@ -72,10 +86,11 @@ const NewBookingRoute = () => {
   return (
     <SafeAreaView
       style={{
+        flex: 1,
         // flexGrow: 1,
         padding: 20,
         color: theme.colors.text,
-        width: "100vw",
+        // width: "100%", // it was vw //"100%",
       }}
     >
       <Text
@@ -93,7 +108,7 @@ const NewBookingRoute = () => {
         style={{
           paddingHorizontal: 16,
           paddingVertical: 10,
-          height: "80vh",
+          height: "80%", // it was vh
           justifyContent: "space-around",
           overflow: "scroll",
         }}

@@ -43,29 +43,73 @@ function AuthProvider(props) {
     useHttpClient();
 
   const router = useRouter();
-  // console.log({ authState });
 
-  // useProtectedRoute(authState.authenticated);
+  const loadUserData = async (userId) => {
+    return sendRequest(`/auth/user/${userId}`)
+      .then(({ data }) => {
+        console.log("loadData fn", { data });
+        if (!data.error) {
+          // setAuthState({
+          //   token: token,
+          //   authenticated: true,
+          //   currentUser: data.userData,
+          // });
+          // router.replace("/");
+          return { error: false, userData: data.userData };
+        } else {
+          // router.replace("/login");
+          return { error: true, msg: "User data could not be retrieved." };
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => setIsLoading(false));
+  };
 
   React.useEffect(() => {
     // router.replace("/login");
+    // return;
     setIsLoading(true); // activate Loading screed
     let token;
     let expiryDate;
     let userId;
+    console.log({ os: Platform.OS });
 
     if (["ios", "android"].includes(Platform.OS)) {
-      SecureStore.getItemAsync("userId").then((res) => {
-        console.log({ res });
-        if (!res) {
-          router.push("/login");
-        }
-        userId = res; //TODO: check it works
-      });
-      SecureStore.getItemAsync(TOKEN_KEY).then((res) => {
-        console.log({ res });
-        token = res; //TODO: check it works
-      });
+      SecureStore.getItemAsync("userId")
+        .then((userIdRes) => {
+          console.log({ userId: userIdRes });
+          if (!userIdRes) {
+            router.push("/login");
+          }
+          // userId = userIdRes; //TODO: check it works
+          SecureStore.getItemAsync(TOKEN_KEY)
+            .then((tokenRes) => {
+              console.log({ token: tokenRes });
+              // token = tokenRes; //TODO: check it works
+              loadUserData(userIdRes)
+                .then((res) => {
+                  console.log("loadData fn", { res });
+                  if (res.error) {
+                    alert(res.msg);
+                    router.push("/login");
+                  }
+                  setAuthState({
+                    token: tokenRes,
+                    authenticated: true,
+                    currentUser: res.userData,
+                  });
+                  router.push("/");
+                })
+                .catch((err) => {
+                  console.log("could not load userdata", { err });
+                  router.push("/login");
+                });
+            })
+            .catch((err) => console.log("no securestore token", err));
+        })
+        .catch((err) => console.log("no securestore userId", err));
 
       // OLD FOR REFERENCE
       // const loadToken = async () => {
@@ -80,30 +124,56 @@ function AuthProvider(props) {
       // };
       // loadToken();
     } else {
+      console.log("SHOULD NOT SEE THIS!");
       token = localStorage.getItem("token");
       expiryDate = localStorage.getItem("expiryDate"); //TODO: check expiry
       userId = localStorage.getItem("userId");
-      if (!token || !userId) {
+      if (!token && !userId) {
         router.push("/login");
+      } else {
+        loadUserData(userId)
+          .then((res) => {
+            console.log("loadData fn", { res });
+            if (res.error) {
+              alert(res.msg);
+              router.push("/login");
+            }
+            setAuthState({
+              token: token,
+              authenticated: true,
+              currentUser: res.userData,
+            });
+            router.push("/");
+          })
+          .catch((err) => {
+            console.log("could not load userdata", { err });
+            router.push("/login");
+          });
       }
     }
 
-    if (userId) {
-      sendRequest(`/auth/user/${userId}`, "GET").then(({ data }) => {
-        console.log({ data });
-        if (token) {
-          setAuthState({
-            token: token,
-            authenticated: true,
-            currentUser: data.userData,
-          });
-          router.replace("/");
-        } else {
-          router.replace("/login");
-        }
-        setIsLoading(false);
-      });
-    }
+    console.log("after", { userId, token });
+
+    // if (userId && token) {
+    //   sendRequest(`/auth/user/${userId}`, "GET")
+    //     .then(({ data }) => {
+    //       console.log({ data });
+    //       if (token) {
+    //         setAuthState({
+    //           token: token,
+    //           authenticated: true,
+    //           currentUser: data.userData,
+    //         });
+    //         router.replace("/");
+    //       } else {
+    //         router.replace("/login");
+    //       }
+    //       setIsLoading(false);
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //     });
+    // }
   }, []);
 
   const login = async (email, password) => {
@@ -142,12 +212,21 @@ function AuthProvider(props) {
         return { error: true, msg: resData.msg };
       }
       if (["ios", "android"].includes(Platform.OS)) {
-        const secureStore = await SecureStore.setItemAsync(
-          TOKEN_KEY,
-          resData.data.token
-        );
-        console.log({ secureStore });
+        SecureStore.setItemAsync(TOKEN_KEY, resData.data.token)
+          .then((res) => {
+            SecureStore.setItemAsync("userId", resData.data.user.id)
+              .then((res) => {
+                setAuthState({
+                  token: resData.token,
+                  authenticated: true,
+                  currentUser: resData.user,
+                });
+              })
+              .catch((err) => console.log({ err }));
+          })
+          .catch((err) => console.log({ err }));
       } else {
+        console.log("SHOULD NOT SEE THIS!");
         localStorage.setItem("token", resData.data.token);
         localStorage.setItem("userId", resData.data.user.id);
         const remainingMilliseconds = 60 * 60 * 1000;
@@ -170,6 +249,7 @@ function AuthProvider(props) {
       // Delete token from storage
       await SecureStore.deleteItemAsync(TOKEN_KEY);
     } else {
+      console.log("SHOULD NOT SEE THIS!");
       localStorage.removeItem("token");
       localStorage.removeItem("expiryDate");
       localStorage.removeItem("userId");

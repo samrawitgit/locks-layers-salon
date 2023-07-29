@@ -60,9 +60,9 @@ function ModalProvider({ children, containerStyle = {} }) {
           onDismiss={hide}
           dismissable={state.dismissable}
           style={{
-            height: "60vh",
-            width: "70vw",
-            left: "9vw",
+            height: "60%", // it was vh
+            width: "70%", // it was vw
+            left: "9%", // it was vw
             display: "grid",
             gridTemplateAreas: `"title title " "title1 title2" "scroll1 scroll2" ". footer"`,
             justifyContent: "space-evenly",
@@ -114,8 +114,8 @@ function ModalProvider({ children, containerStyle = {} }) {
           dismissable={state.dismissable}
           style={{
             ...state.style,
-            width: "70vw",
-            left: "9vw",
+            width: "70%", // it was vw
+            left: "9%", // it was vw
             justifyContent: "center",
           }}
         >
@@ -139,16 +139,16 @@ function ModalProvider({ children, containerStyle = {} }) {
           onDismiss={hide}
           contentContainerStyle={{
             boxShadow: "none",
-            height: "10vh",
-            width: "70vw",
+            height: "10%", // it was vh
+            width: "70%", // it was vw
             ...containerStyle,
           }}
           style={{
-            height: "10vh",
-            width: "70vw",
+            height: "10%", // it was vh
+            width: "70%", // it was vw
             backgroundColor: "rgb(231, 224, 236)",
-            left: "15vw",
-            top: "10vh",
+            left: "15%", // it was vw
+            top: "10%", // it was vh
           }}
         > */}
     </ModalContext.Provider>

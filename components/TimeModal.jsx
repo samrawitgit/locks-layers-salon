@@ -77,7 +77,7 @@ export const TimeModal = (props) => {
             ),
             onDismissModal: () => setTimeTouched({ h: false, m: false }),
             dismissable: false,
-            style: { height: "26vh" },
+            style: { height: "26%" }, //was vh
           });
         }
       }
@@ -104,7 +104,7 @@ export const TimeModal = (props) => {
             showModal({
               title: "Alert",
               content: <Text>Select valid location, service & date first</Text>,
-              style: { height: "20vh" },
+              style: { height: "20%" }, //was vh
             });
             return;
           }

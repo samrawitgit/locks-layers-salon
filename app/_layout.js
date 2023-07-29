@@ -31,14 +31,14 @@ export default function Layout() {
   };
   return (
     // Setup the auth context and render our layout inside of it.
-    <SafeAreaProvider>
-      <AuthProvider>
-        <PaperProvider theme={theme}>
-          <ModalProvider>
+    <PaperProvider theme={theme}>
+      <SafeAreaProvider>
+        <ModalProvider>
+          <AuthProvider>
             <Slot />
-          </ModalProvider>
-        </PaperProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+          </AuthProvider>
+        </ModalProvider>
+      </SafeAreaProvider>
+    </PaperProvider>
   );
 }
