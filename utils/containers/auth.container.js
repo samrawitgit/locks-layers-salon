@@ -63,6 +63,7 @@ function AuthProvider(props) {
       })
       .catch((err) => {
         console.log(err);
+        return { error: true, errData: err };
       })
       .finally(() => setIsLoading(false));
   };
@@ -125,7 +126,7 @@ function AuthProvider(props) {
       // loadToken();
     } else {
       console.log("SHOULD NOT SEE THIS!");
-      token = localStorage.getItem("token");
+      token = localStorage.getItem(TOKEN_KEY);
       expiryDate = localStorage.getItem("expiryDate"); //TODO: check expiry
       userId = localStorage.getItem("userId");
       if (!token && !userId) {
@@ -227,7 +228,7 @@ function AuthProvider(props) {
           .catch((err) => console.log({ err }));
       } else {
         console.log("SHOULD NOT SEE THIS!");
-        localStorage.setItem("token", resData.data.token);
+        localStorage.setItem(TOKEN_KEY, resData.data.token);
         localStorage.setItem("userId", resData.data.user.id);
         const remainingMilliseconds = 60 * 60 * 1000;
         const expiryDate = new Date(
@@ -250,7 +251,7 @@ function AuthProvider(props) {
       await SecureStore.deleteItemAsync(TOKEN_KEY);
     } else {
       console.log("SHOULD NOT SEE THIS!");
-      localStorage.removeItem("token");
+      localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem("expiryDate");
       localStorage.removeItem("userId");
     }

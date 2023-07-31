@@ -22,43 +22,74 @@ const NewBookingRoute = () => {
   const [allLocations, setAllLocations] = useState([]);
   const [allServices, setAllServices] = useState([]);
 
-  useEffect(() => {
-    let token;
-    if (["ios", "android"].includes(Platform.OS)) {
-      SecureStore.getItemAsync("token").then((res) => {
-        console.log({ res });
-        if (!res) {
-          router.push("/login");
-        }
-        token = res; //TODO: check it works
-      });
-    } else {
-      token = localStorage.getItem("token");
-    }
-    console.log({ token });
-    sendRequest("/admin/locations", "GET", null, {
+  const loadSalonsData = async (token) => {
+    return sendRequest("/admin/locations", "GET", null, {
       Authorization: `Bearer ${token}`,
     })
       .then(({ data }) => {
-        console.log({ data });
-        if (!data.error) {
-          setAllLocations(data.locations);
-          sendRequest("/admin/services", "GET", null, {
-            Authorization: `Bearer ${token}`,
-          })
-            .then(({ data }) => {
-              if (!data.error) {
-                setAllServices(data.services);
-              }
-            })
-            .catch((err) => {
-              console.log(err);
-            });
+        console.log("locData loc", { data });
+        if (data.error) {
+          alert("Loading locations error");
+          return { error: true };
         }
+        setAllLocations(data.locations);
+        const locationData = data.locations;
+        sendRequest("/admin/services", "GET", null, {
+          Authorization: `Bearer ${token}`,
+        })
+          .then(({ data }) => {
+            console.log("salData service", { data });
+            if (data.error) {
+              alert("Loading services error");
+              return { error: true };
+            }
+            setAllServices(data.services);
+            const serviceData = data.service;
+            return {
+              error: locationData.error && serviceData.error,
+              locationData,
+              serviceData,
+            };
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       })
       .catch((err) => {
         console.log(err);
       });
+  };
+
+  useEffect(() => {
+    if (["ios", "android"].includes(Platform.OS)) {
+      SecureStore.getItemAsync("my_jwt")
+        .then((res) => {
+          console.log("gettoken", { res });
+          if (!res) {
+            router.push("/login");
+          }
+          loadSalonsData(res)
+            .then((res) => {
+              console.log("newBook jwt", { res });
+              if (res.error) {
+                return alert(res.message);
+              }
+              // setAllLocations(res.locationData);
+              // setAllServices(res.serviceData);
+            })
+            .catch((err) => console.log(err));
+        })
+        .catch((err) => console.log("no jwt in scurestore", err));
+    } else {
+      const token = localStorage.getItem("my_jwt");
+      if (token) {
+        loadSalonsData(token)
+          .then((res) => {
+            console.log("ueff res", { res });
+          })
+          .catch((err) => console.log(err));
+      }
+    }
   }, []);
 
   const makeBooking = async () => {
@@ -90,7 +121,8 @@ const NewBookingRoute = () => {
         // flexGrow: 1,
         padding: 20,
         color: theme.colors.text,
-        // width: "100%", // it was vw //"100%",
+        width: "100%", // it was vw //"100%",
+        overflow: "scroll",
       }}
     >
       <Text
@@ -108,9 +140,9 @@ const NewBookingRoute = () => {
         style={{
           paddingHorizontal: 16,
           paddingVertical: 10,
-          height: "80%", // it was vh
           justifyContent: "space-around",
           overflow: "scroll",
+          minHeight: 765,
         }}
       >
         <View>

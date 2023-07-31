@@ -9,12 +9,16 @@ import {
   TextInput,
   useTheme,
 } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { AuthContext } from "../utils/containers/auth.container";
 import { Platform, View } from "react-native";
 import { useHttpClient } from "../utils";
 
 const Profile = () => {
+  const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { logout } = useContext(AuthContext);
   const [userData, setUserData] = useState({});
@@ -25,7 +29,7 @@ const Profile = () => {
   const loadUserBookings = async (userId) => {
     // console.log({ user, id: user ? user._id : "idk", userId });
     console.log({ userId });
-    return sendRequest(`/user-bookings/${userId}`)
+    return sendRequest(`/auth/user/${userId}`)
       .then(({ data, error }) => {
         if (data.error) {
           console.log(data.message);
@@ -67,27 +71,49 @@ const Profile = () => {
         .catch((err) => console.log("no userId in scurestore", err));
     } else {
       userId = localStorage.getItem("userId");
+      loadUserBookings(userId)
+        .then((res) => {
+          console.log("ueff res", { res });
+          if (res.error) {
+            return alert(res.message);
+          }
+          // setBookingList(res.bookings);
+          setUserData(res.userData);
+        })
+        .catch((err) => console.log(err));
     }
-
-    // sendRequest(`/auth/user/${userId}`)
-    //   .then(({ data }) => {
-    //     if (data.error) {
-    //       console.log(data.message);
-    //       return alert(data.message);
-    //     }
-    //     // console.log({ uD: data.userData });
-    //     setUserData(data.userData);
-    //     setIsLoading(false);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //     alert(err);
-    //     setIsLoading(false);
-    //   });
   }, []);
 
   if (isLoading || !userData || Object.keys(userData).length < 1) {
-    return <Text>Is Loading</Text>;
+    return (
+      <SafeAreaView
+        style={{
+          flex: 1,
+          paddingTop: insets.top,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ fontSize: 30, color: theme.colors.text }}>
+          Is Loading...
+        </Text>
+        <Button
+          onPress={() => logout()}
+          mode="contained"
+          uppercase
+          dark
+          style={{
+            width: 150,
+            height: 50,
+            alignSelf: "center",
+            marginTop: 50,
+            justifyContent: "center",
+          }}
+        >
+          Sign Out
+        </Button>
+      </SafeAreaView>
+    );
   }
 
   return (
@@ -119,6 +145,7 @@ const Profile = () => {
             <View
               style={{
                 flexDirection: "column",
+                flexWrap: "wrap", // TODO: check on android
                 marginLeft: ["ios", "android"].includes(Platform.OS)
                   ? 20
                   : "30px" /*was px = 30*/,
